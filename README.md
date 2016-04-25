@@ -277,7 +277,9 @@ If request cannot pass body controller, it send badRequest.
 If you bored to create CRUD you can use gluon generator.
 
 > **Note:** This generator requires `js-md5` please install before using it
+
 --------------------
+
 > **Warning:** Before generator you must definitely do authentication.
 
 routes/user.js
