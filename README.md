@@ -1,5 +1,8 @@
+![](docs/logo.png)
+
 Gluon
-================
+=============
+We can call gluon a project boss. Simply manages routes, decides which route should go first, also manages models and database connection. With gluon project development will become so much easier.. 
 
 installation
 -----------------
@@ -196,7 +199,7 @@ module.exports = router;
 ```
 
 
-Additional features
+Other awesome features
 ----------------------
 
 ### Generic option (default: true)
@@ -279,10 +282,24 @@ If you bored to create CRUD you can use gluon generator.
 routes/user.js
 ```javascript
 const gluon = require('gluon');
-const control = require('gluon/control');
+const generator = require('gluon/generator');
 const router = gluon.router();
 const user = require('../models/user');
 
+generator(router, user);
 
 module.exports = router;
+```
+
+supported routes
+```
+GET /
+GET /all
+GET /count
+POST /all (filter)
+POST /count (filter)
+GET /:id
+DELETE /:id
+POST / (create new model)
+PATCH /:id (update exiting model)
 ```

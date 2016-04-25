@@ -10,6 +10,7 @@ module.exports = (route, model) => {
   route.get('/', (req, res) => {
     res.json({
       paths: [
+        'GET /',
         'GET /all',
         'GET /count',
         'POST /all (filter)',
