@@ -2,7 +2,7 @@
 
 Gluon
 =============
-We can call gluon a project boss. Simply manages routes, decides which route should go first, also manages models and database connection. With gluon project development will become so much easier.. 
+We can call gluon a project boss. Simply manages routes, decides which route should go first, also manages models and database connection. With gluon, project development became so much easier.. 
 
 installation
 -----------------
@@ -277,6 +277,7 @@ If request cannot pass body controller, it send badRequest.
 If you bored to create CRUD you can use gluon generator.
 
 > **Note:** This generator requires `js-md5` please install before using it
+--------------------
 > **Warning:** Before generator you must definitely do authentication.
 
 routes/user.js
