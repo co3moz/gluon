@@ -36,7 +36,7 @@ function Logger () {
    * @param {...*} [params] format the message body
    */
   this.log = function (message, params) {
-    if (this._detectedLevel() > 1) return;
+    if (this.level() > 1) return;
     if (arguments.length > 1) message = String.prototype.format.apply(message, Array.prototype.slice.call(arguments, 1));
     message = this._prepareMessage('LOG', message);
     console.log(message);
@@ -49,7 +49,7 @@ function Logger () {
    * @param {...*} [params] format the message body
    */
   this.warn = function (message, params) {
-    if (this._detectedLevel() > 2) return;
+    if (this.level() > 2) return;
     if (arguments.length > 1) message = String.prototype.format.apply(message, Array.prototype.slice.call(arguments, 1));
     message = this._prepareMessage('LOG', message);
     console.warn(message);
@@ -62,7 +62,7 @@ function Logger () {
    * @param {...*} [params] format the message body
    */
   this.debug = function (message, params) {
-    if (this._detectedLevel() > 0) return;
+    if (this.level() > 0) return;
     if (arguments.length > 1) message = String.prototype.format.apply(message, Array.prototype.slice.call(arguments, 1));
     message = this._prepareMessage('DEBUG', message);
     console.log(message);
@@ -76,7 +76,7 @@ function Logger () {
    * @param {...*} [params] format the message body
    */
   this.error = function (message, params) {
-    if (this._detectedLevel() > 3) return;
+    if (this.level() > 3) return;
     if (arguments.length > 1) message = String.prototype.format.apply(message, Array.prototype.slice.call(arguments, 1));
     message = this._prepareMessage('ERROR', message);
     console.error(message);
@@ -138,9 +138,8 @@ function Logger () {
   /**
    * Detect recording level
    * @returns {number}
-   * @private
    */
-  this._detectedLevel = () => {
+  this.level = () => {
     switch (this.get('level')) {
       case 'DEBUG':
         return 0;

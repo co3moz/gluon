@@ -1,6 +1,6 @@
 {
   "name": "gluon",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Manager of project database, models, routes, logging and many more..",
   "main": "gluon.js",
   "dependencies": {

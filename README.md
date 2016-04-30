@@ -410,7 +410,38 @@ config/default.json
 {
     "gluon": {
         "generic": "false", // don't use generic system
-        "log": "false" // don't log requests
+        "log": "false", // don't log requests
+        "dir": "./src" // where is my app.js from cwd
     }
 }
+```
+
+### Direct listen from code or config
+
+> **Note:** if PORT is given by environment then this port is not will be evaluated
+
+config/default.json
+```javascript
+{
+    "gluon": {
+        "listen": 80 
+        // or
+        "listen": {
+            "ip": "1.2.3.4",
+            "port": 80
+        }
+    }
+}
+```
+
+or
+
+```javascript
+const gluon = require('gluon');
+const app = gluon({
+    listen: {
+        ip: "127.0.0.1",
+        port: 80
+    }
+});
 ```
