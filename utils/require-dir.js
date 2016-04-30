@@ -1,9 +1,12 @@
 const path = require('path');
 const glob = require('glob');
 const firstBy = require('thenby');
+const logger = require('../logger');
 
 /**
- * Requires dir
+ * Module existance checker
+ * @param {...*} args Location of directory (can use multiple location at ones like, './a', './sub' => './a/sub'
+ * @param {Function} [callback] Callback function that called when all required files loaded.
  */
 module.exports = function () {
   var args = Array.prototype.slice.call(arguments);
@@ -17,7 +20,7 @@ module.exports = function () {
   args.unshift(process.cwd());
   var dir = path.resolve.apply(path, args);
 
-  console.log('gluon: Searching js files in {0}', dir);
+  logger.debug('Looking js files in {0} directory', dir);
   glob(dir + '/**/*.js', function (err, files) {
     const mix = files.map(file => {
       return {

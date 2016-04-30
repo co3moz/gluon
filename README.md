@@ -138,7 +138,10 @@ database and models
 --------------------
 Gluon uses sequelize to communicate with database. But first you must create `config` folder in your cwd. For example your cwd is `/root/myproject/`, and your project files in `/root/myproject/src` create config in `/root/myproject/config` and don't forget to add dir option to gluon's first parameter.
 
+> **Note:** These modules requires `sequelize` and `config` please install before using it
+
 you can create a json file that called by `default.json`
+
 default.json
 ```json
 {
@@ -153,6 +156,7 @@ default.json
 ```
 
 now create a folder in src folder that called by `models`
+
 models/user.js
 ```javascript
 const Sequelize = require('sequelize');
@@ -182,9 +186,8 @@ module.exports = db.define('User', {
 });
 ```
 
-everything is ready, start the project. gluon will connect db automaticly and load your models immediately. 
+everything is ready, start the project. gluon will connect db automaticly and load your models immediately. use your models in router
 
-use your models in router
 routes/user.js
 ```javascript
 const gluon = require('gluon');
@@ -221,13 +224,14 @@ app.use((req, res) => {
 * **database** _Database error (if caused by validation then it automaticly calls)_ 500 (err) `{error: true, info: 'Database triggered an error. Please check your request. If there is no problem then contact with service provider.'}`
 * **expiredToken** _Use when a token expires_ 408 (info) `{error: true, info}`
 
-### Completed option
+### Ready option
 use when you need to wait all gluon initial job. Its very important option
+
 ```javascript
 const gluon = require('gluon');
 const app = gluon({
     dir: 'src/',
-    completed: (app) => {
+    ready: (app) => {
         app.use((err, req, res, next) => {
             res.send("something wrong");
         });
@@ -276,11 +280,24 @@ If request cannot pass body controller, it send badRequest.
 
 If you bored to create CRUD you can use gluon generator.
 
-> **Note:** This generator requires `js-md5` please install before using it
+> **Note:** This generator requires `js-md5` please install before using it. With this you don't need to serialize `password` field. it does automaticly.
+>
+> **Warning:** Before generator you must definitely do authentication. 
 
---------------------
+supported routes
+```
+GET /
+GET /all
+GET /count
+POST /all (filter)
+POST /count (filter)
+GET /:id
+DELETE /:id
+POST / (create new model)
+PATCH /:id (update exiting model)
+```
 
-> **Warning:** Before generator you must definitely do authentication.
+#### Example 
 
 routes/user.js
 ```javascript
@@ -294,15 +311,106 @@ generator(router, user);
 module.exports = router;
 ```
 
-supported routes
+### Gluon logger
+
+Starting from 1.1.0 gluon no longer uses `ezlogger`, we suggest to use `gluon/logger`.
+
+#### Options
+
+These are default values of options, you can change them using by `logger.set( )` or you can install `config` module and create `logger` object (example 2)
+
+```javascript
+{
+  dir: './logs',
+  level: 'DEBUG',
+  fileFormat: 'log.{date}.txt',
+  dateFormat: '{year}/{month p 2}/{day p 2}',
+  fileDateFormat: '{year}.{month p 2}.{day p 2}',
+  timeFormat: '{hour p 2}:{minute p 2}:{second p 2}',
+  type: 'full',
+  full: '{date} {time} {type} {file}:{line} {message}',
+  exceptDate: '{time} {type} {file}:{line} {message}',
+  simple: '{type} {message}',
+  withFile: '{type} {file}:{info} {message}'
+}
 ```
-GET /
-GET /all
-GET /count
-POST /all (filter)
-POST /count (filter)
-GET /:id
-DELETE /:id
-POST / (create new model)
-PATCH /:id (update exiting model)
+
+#### Create new logging type
+
+```javascript
+const logger = require('gluon/logger');
+logger.set('myOwnLoggerType', '{time} {file}:{line} {type} {message}');
+logger.set('type', 'myOwnLoggerType');
+```
+
+#### Example
+
+app.js
+```javascript
+const gluon = require('gluon');
+const logger = require('gluon/logger')
+logger.set('type', 'full'); // logs everything.. default value: full
+logger.set('dir', './logs/'); // cwd/logs
+
+const app = gluon({log: true}); // log route actions too
+app.listen(80);
+logger.log('server started to listen at 80');
+```
+
+routes/home.js
+```javascript
+const gluon = require('gluon');
+const logger = require('gluon/logger');
+const router = gluon.router();
+
+
+module.exports = router;
+```
+
+#### Example 2: with config
+
+> **Note:** You must install config first. `npm install config --save`
+
+app.js
+```javascript
+const gluon = require('gluon');
+const logger = require('gluon/logger');
+
+const app = gluon();
+app.listen(80);
+logger.log('server started to listen at 80');
+```
+
+routes/home.js
+```javascript
+const gluon = require('gluon');
+const logger = require('gluon/logger');
+const router = gluon.router();
+
+
+module.exports = router;
+```
+
+config/default.json
+```json
+{
+    "logger": {
+        "level": "LOG",
+        "type": "myOwn",
+        "myOwn": "{type} {file}:{line} {message}"
+    }
+}
+```
+
+
+### Gluon defaults by config
+
+config/default.json
+```js
+{
+    "gluon": {
+        "generic": "false", // don't use generic system
+        "log": "false" // don't log requests
+    }
+}
 ```

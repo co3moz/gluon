@@ -1,4 +1,12 @@
-const sequelizeErrors = require('sequelize/lib/errors');
+var sequelizeErrors;
+
+try {
+  sequelizeErrors = require('sequelize/lib/errors');
+} catch(e) {
+  // generic doesn't require sequelize, but if you use res.database then you get error.
+}
+
+const logger = require('../logger');
 
 module.exports = (app) => {
   app.use((req, res, next) => {
@@ -67,7 +75,7 @@ module.exports = (app) => {
         error: true,
         info: 'Database triggered an error. Please check your request. If there is no problem then contact with service provider.'
       });
-      console.log('Request returned a database error:\n{0:j:4}', err);
+      logger.log('Request returned a database error:\n{0:j:4}', err);
     };
 
     res.expiredToken = (info) => {

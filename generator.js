@@ -1,10 +1,12 @@
+require('./utils/module-checker')(['js-md5']);
+
 const md5 = require('js-md5');
 const control = require("./control");
 
 /**
  * Generic model route generator
  * @param {Router} route
- * @param {Model|*} model
+ * @param {*} model
  */
 module.exports = (route, model) => {
   route.get('/', (req, res) => {
