@@ -1,5 +1,6 @@
 const express = require('express');
 const os = require('os');
+const path = require('path');
 const ezFormat = require('ezformat');
 const bodyParser = require('body-parser');
 const requireDir = require('./utils/require-dir');
@@ -8,7 +9,9 @@ const logger = require('./logger');
 
 var defaults = {
   generic: true,
-  log: true
+  log: true,
+  publicSource: './public',
+  dir: ''
 };
 
 try {
@@ -27,7 +30,8 @@ try {
  * @param {Boolean} [options.generic=true] Should gluon initialize generic extension.
  * @param {Boolean} [options.log=true] Should gluon initialize request logging mechanism.
  * @param {Function} [options.ready] Ready signal
- * @param {String} [options.dir] Location of project
+ * @param {String} [options.dir=''] Location of project
+ * @param {String|Array<String>} [options.publicSource='./public'] Location of project
  * @param {{ip: String, port: Number}|Number} [options.listen] Should i listen?
  * @returns {app|*}
  */
@@ -63,10 +67,26 @@ function Gluon (options) {
     });
   }
 
+  if (options.publicSource) {
+    if (typeof options.publicSource == "string") {
+      const location = path.resolve(process.cwd(), options.dir, options.publicSource);
+      app.use(express['static'](location));
+      logger.debug('folder {0} has been set as public', location);
+    } else if (options.publicSource == null) {
+      logger.debug('there is no public folder');
+    } else if (options.publicSource.constructor == Array) {
+      options.publicSource.forEach((source)=> {
+        const location = path.resolve(process.cwd(), options.dir, source);
+        app.use(express['static'](location));
+        logger.debug('folder {0} has been set as public', location);
+      });
+    }
+  }
+
 
   logger.debug('Folder control unit loading..');
-  requireDir(options.dir || '', './models', () => {
-    requireDir(options.dir || '', './routes', (files) => {
+  requireDir(options.dir, './models', () => {
+    requireDir(options.dir, './routes', (files) => {
       routeLoader(files, app);
 
       logger.debug('Gluon ready!');

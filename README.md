@@ -445,3 +445,30 @@ const app = gluon({
     }
 });
 ```
+
+### Create public folders
+
+> **Note:** default public folder is `./public` (searching as `cwd/project dir/public`)
+
+config/default.json
+```javascript
+{
+    "gluon": {
+        "publicSource": "./static"
+        // or
+        "publicSource": [
+            "./public", // public has more priority than static one
+            "./static"
+        ]
+    }
+}
+```
+
+or
+
+```javascript
+const gluon = require('gluon');
+const app = gluon({
+    publicSource: './public',
+});
+```
