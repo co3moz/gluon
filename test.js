@@ -1,7 +1,10 @@
 const gluon = require('.');
 const app = gluon({
   listen: 80,
+  before: (app, logger) => {
+    logger.log('before')
+  },
   ready: (app, logger) => {
-    app.use('/', (req, res) => res.send("ok"));
+    logger.log('ready');
   }
 });

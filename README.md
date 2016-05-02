@@ -224,13 +224,16 @@ app.use((req, res) => {
 * **database** _Database error (if caused by validation then it automaticly calls)_ 500 (err) `{error: true, info: 'Database triggered an error. Please check your request. If there is no problem then contact with service provider.'}`
 * **expiredToken** _Use when a token expires_ 408 (info) `{error: true, info}`
 
-### Ready option
-use when you need to wait all gluon initial job. Its very important option
+### Ready option and Before option
+use when you need to wait all gluon initial job. Its very handy option
 
 ```javascript
 const gluon = require('gluon');
 const app = gluon({
     dir: 'src/',
+    before: (app) => {
+        app.use(require('compression')());
+    },
     ready: (app) => {
         app.use((err, req, res, next) => {
             res.send("something wrong");

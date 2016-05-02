@@ -29,7 +29,8 @@ try {
  * @param [options.app] Express application container. if you make this empty then system create new one.
  * @param {Boolean} [options.generic=true] Should gluon initialize generic extension.
  * @param {Boolean} [options.log=true] Should gluon initialize request logging mechanism.
- * @param {Function} [options.ready] Ready signal
+ * @param {Function(app|*, Logger)} [options.ready] Ready signal
+ * @param {Function(app|*, Logger)} [options.before] Before anything loaded
  * @param {String} [options.dir=''] Location of project
  * @param {String|Array<String>} [options.publicSource='./public'] Location of project
  * @param {{ip: String, port: Number}|Number} [options.listen] Should i listen?
@@ -49,6 +50,7 @@ function Gluon (options) {
     require('./utils/generic-response')(app);
   }
 
+  if (options.before) options.before(app, logger);
 
   logger.debug('Body parser loading..');
   app.use(bodyParser.urlencoded({extended: false}));
