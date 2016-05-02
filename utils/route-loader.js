@@ -8,9 +8,8 @@ const logger = require('../logger');
  */
 module.exports = (files, app) => {
   files.forEach((file) => {
-    if (file.data == null || file.data.name != 'router') {
-      return logger.error('cannot load router {name}, make it by gluon.router', file);
-    }
+    if (file.data == null || file.data.name != 'router') return logger.error('cannot load router {name}, make it by gluon.router', file);
+    if (file.data.ignore == true) return logger.debug('route {name} ignored', file);
 
     if (file.data.location) {
       logger.debug('route {name} loaded to /{data.location}', file);

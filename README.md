@@ -475,3 +475,34 @@ const app = gluon({
     publicSource: './public',
 });
 ```
+
+
+### Ignore a route
+
+You might want to ignore a route that shouldn't routed by gluon itself. Maybe you want to use this for other purposes.
+
+routes/authentication.js
+```javascript
+const gluon = require('gluon');
+const router = gluon.router(null, true);
+
+router.use((req, res, next) => {
+    authentication check..
+    next();
+});
+
+module.exports = router;
+```
+
+routes/logout.js
+```javascript
+const gluon = require('gluon');
+const router = gluon.router();
+
+router.use(require('./authentication'));
+router.all('/', (req, res) => {
+    logout..
+});
+
+module.exports = router;
+```

@@ -121,11 +121,13 @@ function Gluon (options) {
 /**
  * Gluon router
  * @param {String} [location] Override location?
+ * @param {Boolean} [ignore=false] Ignore me when routes binding
  * @returns {Router}
  */
-Gluon.router = (location) => {
+Gluon.router = (location, ignore) => {
   var router = express.Router();
   router.location = location;
+  router.ignore = ignore;
   return router;
 };
 
