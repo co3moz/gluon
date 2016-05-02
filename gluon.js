@@ -11,6 +11,8 @@ var defaults = {
   generic: true,
   log: true,
   publicSource: './public',
+  models: './models',
+  routes: './routes',
   dir: ''
 };
 
@@ -32,6 +34,8 @@ try {
  * @param {Function(app|*, Logger)} [options.ready] Ready signal
  * @param {Function(app|*, Logger)} [options.before] Before anything loaded
  * @param {String} [options.dir=''] Location of project
+ * @param {String} [options.models='./models'] Location of models folder
+ * @param {String} [options.routes='./routes'] Location of routes folder
  * @param {String|Array<String>} [options.publicSource='./public'] Location of project
  * @param {{ip: String, port: Number}|Number} [options.listen] Should i listen?
  * @returns {app|*}
@@ -92,8 +96,8 @@ function Gluon (options) {
 
 
   logger.debug('Folder control unit loading..');
-  requireDir(options.dir, './models', () => {
-    requireDir(options.dir, './routes', (files) => {
+  requireDir(options.dir, options.models, () => {
+    requireDir(options.dir, options.routes, (files) => {
       routeLoader(files, app);
 
       logger.debug('Gluon ready!');
@@ -115,7 +119,7 @@ function Gluon (options) {
 }
 
 /**
- * Gluon router binded to express
+ * Gluon router
  * @param {String} [location] Override location?
  * @returns {Router}
  */
