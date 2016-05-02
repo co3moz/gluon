@@ -6,5 +6,10 @@ const app = gluon({
   },
   ready: (app, logger) => {
     logger.log('ready');
+    app.get('/laggy', (req, res) => {
+      setTimeout(() => {
+        res.ok();
+      }, 1000);
+    })
   }
 });

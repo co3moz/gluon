@@ -14,7 +14,8 @@ var defaults = {
   full: '{date} {time} {type} {file}:{line} {message}',
   exceptDate: '{time} {type} {file}:{line} {message}',
   simple: '{type} {message}',
-  withFile: '{type} {file}:{info} {message}'
+  withFile: '{type} {file}:{info} {message}',
+  request: '[{req.method}] {coloredStatus} {time} {req.headers.host}{req.url} from {req.ip}'
 };
 
 var color = {

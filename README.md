@@ -334,7 +334,8 @@ These are default values of options, you can change them using by `logger.set( )
   full: '{date} {time} {type} {file}:{line} {message}',
   exceptDate: '{time} {type} {file}:{line} {message}',
   simple: '{type} {message}',
-  withFile: '{type} {file}:{info} {message}'
+  withFile: '{type} {file}:{info} {message}',
+  request: '[{req.method}] {coloredStatus} {time} {req.headers.host}{req.url} from {req.ip}'
 }
 ```
 
@@ -487,7 +488,7 @@ const gluon = require('gluon');
 const router = gluon.router(null, true);
 
 router.use((req, res, next) => {
-    authentication check..
+    if(authentication check..) return res.unauthorized('you must log in'); 
     next();
 });
 

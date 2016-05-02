@@ -1,5 +1,5 @@
 /**
- * Module existance checker
+ * Module existence checker
  * @param {Array<String>} modules Which modules will be checked
  */
 module.exports = (modules) => {

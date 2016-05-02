@@ -63,11 +63,20 @@ function Gluon (options) {
   if (options.log == true) {
     logger.debug('Request logging mechanism generating..');
     app.use((req, res, next) => {
+      const now = new Date;
       res.on('finish', () => {
-        const status = res.statusCode + "";
-        const color = res.statusCode >= 500 ? status.red : res.statusCode >= 400 ? status.red
+        const status = res.statusCode + '';
+        const coloredStatus = res.statusCode >= 500 ? status.red : res.statusCode >= 400 ? status.red
           : res.statusCode >= 300 ? status.yellow : res.statusCode >= 200 ? status.green : status;
-        logger.log('[{method}] {1} {headers.host}{url} from {ip}', req, color);
+        var time = new Date - now;
+        time = time < 100 ? ((time >>> 0) + 'ms').green
+          : time < 500 ? ((time >>> 0) + 'ms').yellow
+          : time < 1000 ? ((time >>> 0) + 'ms').red
+          : time < 60000 ? ('{0:fixed:2}s'.format(time / 1000)).red
+          : time < 3600000 ? ('{0:fixed:2}m'.format(time / 60000)).red
+          : ('{0:fixed:2}h'.format(time / 3600000)).red;
+
+        logger.log(logger.get('request'), {req, coloredStatus, time});
 
         if (logger.level() <= 0) {
           const keys = Object.keys(req.body);
@@ -79,17 +88,17 @@ function Gluon (options) {
   }
 
   if (options.publicSource) {
-    if (typeof options.publicSource == "string") {
+    if (typeof options.publicSource == 'string') {
       const location = path.resolve(process.cwd(), options.dir, options.publicSource);
       app.use(express['static'](location));
-      logger.debug('folder {0} has been set as public', location);
+      logger.debug('Folder {0} has been set as public', location);
     } else if (options.publicSource == null) {
-      logger.debug('there is no public folder');
+      logger.debug('There is no public folder');
     } else if (options.publicSource.constructor == Array) {
       options.publicSource.forEach((source)=> {
         const location = path.resolve(process.cwd(), options.dir, source);
         app.use(express['static'](location));
-        logger.debug('folder {0} has been set as public', location);
+        logger.debug('Folder {0} has been set as public', location);
       });
     }
   }
