@@ -17,11 +17,41 @@ var defaults = {
   withFile: '{type} {file}:{info} {message}'
 };
 
+var color = {
+  'bold': {a: '\x1B[1m', b: '\x1B[22m'},
+  'black': {a: '\x1B[30m', b: '\x1B[39m'},
+  'red': {a: '\x1B[31m', b: '\x1B[39m'},
+  'green': {a: '\x1B[32m', b: '\x1B[39m'},
+  'yellow': {a: '\x1B[33m', b: '\x1B[39m'},
+  'blue': {a: '\x1B[34m', b: '\x1B[39m'},
+  'magenta': {a: '\x1B[35m', b: '\x1B[39m'},
+  'cyan': {a: '\x1B[36m', b: '\x1B[39m'},
+  'white': {a: '\x1B[37m', b: '\x1B[39m'}
+};
+/**
+ * @memberof String.prototype
+ * @property {String} black
+ * @property {String} red
+ * @property {String} green
+ * @property {String} yellow
+ * @property {String} blue
+ * @property {String} magenta
+ * @property {String} cyan
+ * @property {String} white
+ */
+Object.keys(color).forEach((c) => {
+  Object.defineProperty(String.prototype, c, {
+    get: function () {
+      return color[c].a + this + color[c].b
+    }
+  });
+});
+
 try {
   const config = require('config');
   const loggerDefaults = config.get('logger');
   Object.assign(defaults, loggerDefaults);
-} catch(e) {
+} catch (e) {
   // if there is no config installation than ignore
 }
 
@@ -51,7 +81,7 @@ function Logger () {
   this.warn = function (message, params) {
     if (this.level() > 2) return;
     if (arguments.length > 1) message = String.prototype.format.apply(message, Array.prototype.slice.call(arguments, 1));
-    message = this._prepareMessage('LOG', message);
+    message = this._prepareMessage('WARNING', message);
     console.warn(message);
     this._logToFile(message);
   };
@@ -92,8 +122,10 @@ function Logger () {
    * @private
    */
   this._prepareMessage = (type, message) => {
-    const simple = {type: type, message: typeof message == 'string' ? message : "{0 j 4}".format(message)};
-
+    const simple = {
+      type: this.colorType(type),
+      message: typeof message == 'string' ? message : os.EOL + "{0 j 4}".format(message)
+    };
     switch (this.get('type')) {
       case 'simple':
         return this.get('simple').format(simple);
@@ -131,7 +163,7 @@ function Logger () {
       day: now.getDate()
     });
     const location = path.resolve(process.cwd(), this.get('dir'), this.get('fileFormat').format({date}));
-    fs.appendFile(location, message + os.EOL);
+    fs.appendFile(location, (message + os.EOL).replace(/\x1B\[\d+m/g, ''));
   };
 
 
@@ -151,6 +183,25 @@ function Logger () {
         return 3;
       default:
         return 0;
+    }
+  };
+
+  /**
+   * Colored type
+   * @returns {String}
+   */
+  this.colorType = (type) => {
+    switch (type) {
+      case 'DEBUG':
+        return type.yellow;
+      case 'LOG':
+        return type.magenta;
+      case 'WARN':
+        return type.cyan;
+      case 'ERROR':
+        return type.red;
+      default:
+        return type;
     }
   };
 
@@ -175,7 +226,7 @@ function Logger () {
   /**
    * Finds file name that executing
    * @param {Number} [at] Stack position
-   * @returns {{file: String, line: Number}}
+   * @returns {{file: String, line: String}}
    * @private
    */
   this._getActiveFunction = (at) => {
@@ -191,8 +242,8 @@ function Logger () {
     Error.prepareStackTrace = prepareStackTrace;
     Error.stackTraceLimit = stackTraceLimit;
 
-    const file = stack["getEvalOrigin"]().split(/\\|\//).pop();
-    const line = stack["getLineNumber"]();
+    const file = stack["getEvalOrigin"]().split(/\\|\//).pop().blue;
+    const line = stack["getLineNumber"]().toString().magenta;
     return {file, line};
   };
 

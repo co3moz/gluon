@@ -57,12 +57,18 @@ function Gluon (options) {
   if (options.log == true) {
     logger.debug('Request logging mechanism generating..');
     app.use((req, res, next) => {
-      logger.log('[{method}] {headers.host}{url} from {ip}', req);
+      res.on('finish', () => {
+        var color = res.statusCode >= 500 ? '\x1B[31m' + res.statusCode + '\x1B[39m'
+          : res.statusCode >= 400 ? '\x1B[33m' + res.statusCode + '\x1B[39m'
+          : res.statusCode >= 300 ? '\x1B[36m' + res.statusCode + '\x1B[39m'
+          : res.statusCode >= 200 ? '\x1B[32m' + res.statusCode + '\x1B[39m' : res.statusCode;
+        logger.log('[{method}] {1} {headers.host}{url} from {ip}', req, color);
 
-      if (logger.level() <= 0) {
-        const keys = Object.keys(req.body);
-        if (keys.length > 0) logger.debug('body information ({length}): {2.EOL}{1 j 4}', keys, req.body, os);
-      }
+        if (logger.level() <= 0) {
+          const keys = Object.keys(req.body);
+          if (keys.length > 0) logger.debug('body information ({length}): {2.EOL}{1 j 4}', keys, req.body, os);
+        }
+      });
       next();
     });
   }
@@ -90,15 +96,15 @@ function Gluon (options) {
       routeLoader(files, app);
 
       logger.debug('Gluon ready!');
-      if (options.ready) options.ready(app);
+      if (options.ready) options.ready(app, logger);
 
       if (options.listen != undefined) {
         if (typeof options.listen == 'object') {
           app.listen(process.env.port || options.listen.port, options.listen.ip);
-          logger.log('Listener started at {2}:{0 def(1)}', process.env.port, options.listen.port, options.listen.ip);
+          logger.log('Listener started on {2}:{0 def(1)}'.green, process.env.port, options.listen.port, options.listen.ip);
         } else if (typeof options.listen == 'number') {
           app.listen(process.env.port || options.listen);
-          logger.log('Listener started at 0.0.0.0:{0 def(1)}', process.env.port, options.listen);
+          logger.log('Listener started on 0.0.0.0:{0 def(1)}'.green, process.env.port, options.listen);
         }
       }
     });
