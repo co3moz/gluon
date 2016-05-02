@@ -75,7 +75,7 @@ module.exports = (app) => {
         error: true,
         info: 'Database triggered an error. Please check your request. If there is no problem then contact with service provider.'
       });
-      logger.log('Request returned a database error:\n{0:j:4}', err);
+      logger.error('Request returned a database error:\n{stack}', err);
     };
 
     res.expiredToken = (info) => {
