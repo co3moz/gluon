@@ -60,10 +60,9 @@ function Gluon (options) {
     logger.debug('Request logging mechanism generating..');
     app.use((req, res, next) => {
       res.on('finish', () => {
-        var color = res.statusCode >= 500 ? '\x1B[31m' + res.statusCode + '\x1B[39m'
-          : res.statusCode >= 400 ? '\x1B[33m' + res.statusCode + '\x1B[39m'
-          : res.statusCode >= 300 ? '\x1B[36m' + res.statusCode + '\x1B[39m'
-          : res.statusCode >= 200 ? '\x1B[32m' + res.statusCode + '\x1B[39m' : res.statusCode;
+        const status = res.statusCode + "";
+        const color = res.statusCode >= 500 ? status.red : res.statusCode >= 400 ? status.red
+          : res.statusCode >= 300 ? status.yellow : res.statusCode >= 200 ? status.green : status;
         logger.log('[{method}] {1} {headers.host}{url} from {ip}', req, color);
 
         if (logger.level() <= 0) {
