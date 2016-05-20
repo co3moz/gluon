@@ -19,15 +19,15 @@ var defaults = {
 };
 
 var color = {
-  'bold': {a: '\x1B[1m', b: '\x1B[22m'},
-  'black': {a: '\x1B[30m', b: '\x1B[39m'},
-  'red': {a: '\x1B[31m', b: '\x1B[39m'},
-  'green': {a: '\x1B[32m', b: '\x1B[39m'},
-  'yellow': {a: '\x1B[33m', b: '\x1B[39m'},
-  'blue': {a: '\x1B[34m', b: '\x1B[39m'},
-  'magenta': {a: '\x1B[35m', b: '\x1B[39m'},
-  'cyan': {a: '\x1B[36m', b: '\x1B[39m'},
-  'white': {a: '\x1B[37m', b: '\x1B[39m'}
+  'bold': {start: '\x1B[1m', end: '\x1B[22m'},
+  'black': {start: '\x1B[30m', end: '\x1B[39m'},
+  'red': {start: '\x1B[31m', end: '\x1B[39m'},
+  'green': {start: '\x1B[32m', end: '\x1B[39m'},
+  'yellow': {start: '\x1B[33m', end: '\x1B[39m'},
+  'blue': {start: '\x1B[34m', end: '\x1B[39m'},
+  'magenta': {start: '\x1B[35m', end: '\x1B[39m'},
+  'cyan': {start: '\x1B[36m', end: '\x1B[39m'},
+  'white': {start: '\x1B[37m', end: '\x1B[39m'}
 };
 /**
  * @memberof String.prototype
@@ -41,11 +41,13 @@ var color = {
  * @property {String} white
  */
 Object.keys(color).forEach((c) => {
-  Object.defineProperty(String.prototype, c, {
-    get: function () {
-      return color[c].a + this + color[c].b
-    }
-  });
+  if (!String.prototype[c]) {
+    Object.defineProperty(String.prototype, c, {
+      get: function () {
+        return color[c].start + this + color[c].end
+      }
+    });
+  }
 });
 
 try {
@@ -60,7 +62,7 @@ try {
  * Gluon logger manager
  * @class
  */
-function Logger () {
+function Logger() {
   /**
    * Write a simple log
    * @param {String|Object} message Message of body

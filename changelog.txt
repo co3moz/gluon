@@ -1,0 +1,4 @@
+# Changelog
+
+## 1.2.8
+* Fixed redefinition of colored prototypes.
