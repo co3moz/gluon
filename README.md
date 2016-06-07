@@ -540,7 +540,7 @@ config/default.json
                 "/login", // default you can't block /login
                 "/register", // same here these are default.
                 "/dashboard",
-                "/blabla/:id", // you can do this too. but only format is ":xxxx" nothing more, simply makes ".*" regex
+                "/blabla/:id", // you can do this too. but only format is ":xxxx" nothing more, simply makes "[^\/]*" regex
                 "regexp:^/damn/you/know+/regexp" // you can use regexp with this "regexp:" prefix
             ],
             "routes": {
