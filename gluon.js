@@ -167,7 +167,7 @@ function Gluon(options) {
                   code: role,
                   ownerId: req[options.auth.model].id
                 },
-                
+
                 defaults: {
                   code: role,
                   ownerId: req[options.auth.model].id
@@ -252,7 +252,7 @@ function Gluon(options) {
                 }
               }
             }).then((count)=> {
-              if (count >= requiredRoles.length) return res.unauthorized('You do not have right roles to use this service');
+              if (count != requiredRoles.length) return res.unauthorized('You do not have right roles to use this service');
               next();
             });
 
