@@ -608,9 +608,29 @@ router.get('/:id', (req, res) => {
     Role.addRole(id of user, "canEditDoor5").then((role) => {
 
     });
-
-    // you ca
 });
 
 module.exports = router;
+```
+
+By time tokens will stay there. You must use `node-schedule` or similier cron job tools. You can use this.
+
+app.js
+```javascript
+const gluon = require('gluon');
+const schedule = require('node-schedule');
+const app = gluon({
+  ready: () => {
+    const Token = require('gluon/token');
+    schedule.scheduleJob('*/10 * * * *', () => { // remove expired tokens for every 10 minutes
+      Token.destroy({
+        where: {
+          expire: {
+            $lt: new Date
+          }
+        }
+      });
+    });
+  }
+});
 ```
