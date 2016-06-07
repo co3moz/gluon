@@ -613,7 +613,7 @@ router.get('/:id', (req, res) => {
 module.exports = router;
 ```
 
-By time tokens will stay there. You must use `node-schedule` or similiar cron job tools. You can use this.
+By time tokens will stay there. You must use `node-schedule` or similar cron job tools. You can use this.
 
 app.js
 ```javascript
