@@ -13,7 +13,16 @@ var defaults = {
   publicSource: './public',
   models: './models',
   routes: './routes',
-  dir: ''
+  dir: '',
+  auth: null
+};
+
+var authDefaults = {
+  disable: false,
+  expire: 43200,
+  model: "user",
+  token: './token',
+  role: './role'
 };
 
 try {
@@ -36,11 +45,12 @@ try {
  * @param {String} [options.dir=''] Location of project
  * @param {String} [options.models='./models'] Location of models folder
  * @param {String} [options.routes='./routes'] Location of routes folder
+ * @param {String} [options.auth=null] Authentication controller
  * @param {String|Array<String>} [options.publicSource='./public'] Location of project
  * @param {{ip: String, port: Number}|Number} [options.listen] Should i listen?
  * @returns {app|*}
  */
-function Gluon (options) {
+function Gluon(options) {
   (options != undefined || (options = {}));
   Object.keys(defaults).forEach((key) => {
     if (options[key] == undefined) options[key] = defaults[key];
@@ -87,6 +97,175 @@ function Gluon (options) {
     });
   }
 
+  if (options.auth && options.auth.base == "token") {
+    options.auth = Object.assign(authDefaults, options.auth);
+    if (options.auth.disable == false || options.auth.disable == undefined || options.auth.disable == "false") {
+      const authLocation = path.resolve(process.cwd(), options.dir, options.models, options.auth.model);
+      try {
+        global._gluon_auth_model = require(authLocation);
+        global._gluon_auth_expire = options.auth.expire;
+      } catch (e) {
+        logger.error('Auth model is not exist in {0}', authLocation);
+      }
+
+      if (global._gluon_auth_model) {
+        const Token = require(options.auth.token);
+        const Role = require(options.auth.role);
+
+        const allow = options.auth.allow ? options.auth.allow.map((route, i) => {
+          return new RegExp(route.indexOf("regexp:") == 0 ? route.substring(7) : "^" + route.replace(/:[^\\/]+/g, '.*'));
+        }) : [];
+
+        const routes = Object.keys(options.auth.routes || {}).map((route, i) => {
+          return {
+            match: new RegExp(route.indexOf("regexp:") == 0 ? route.substring(7) : "^" + route.replace(/:[^\\/]+/g, '.*')),
+            role: options.auth.routes[route]
+          };
+        });
+
+        app.use((req, res, next) => {
+          /**
+           * Authentication protocol for gluon
+           */
+          req.auth = {
+            /**
+             * Creates a token for model
+             * @param {Model} model
+             * @returns {Promise.<TResult>}
+             */
+            login: (model) => {
+              return Token.create({
+                code: Token.generateCode(),
+                expire: Token.defaultExpire(),
+                ownerId: model.id
+              }).then((data) => data).catch((err) => res.database(err));
+            },
+
+
+            /**
+             * Removes token from owner
+             * @returns {Promise.<TResult>}
+             */
+            logout: () => {
+              return Token.destroy({
+                where: {
+                  code: req.get('token')
+                }
+              }).then((data) => data).catch((err) => res.database(err));
+            },
+
+
+            /**
+             * Adds a role to owner
+             *
+             * @param {String} role Which role
+             * @returns {Promise.<Instance>}
+             */
+            addRole: (role) => {
+              return Role.findOrCreate({
+                where: {
+                  code: role,
+                  ownerId: req[options.auth.model].id
+                },
+                
+                defaults: {
+                  code: role,
+                  ownerId: req[options.auth.model].id
+                }
+              }).spread((role, created) => role).catch((err) => res.database(err));
+            },
+
+
+            /**
+             * Removes a role from owner
+             *
+             * @param {String} role Which role
+             * @returns {Promise.<Integer>}
+             */
+            removeRole: (role) => {
+              return Role.destroy({
+                where: {
+                  code: role,
+                  ownerId: req[options.auth.model].id
+                },
+                limit: 1
+              }).catch((err) => res.database(err));
+            },
+
+
+            /**
+             * Checks for role
+             *
+             * @param {String} role Which role
+             * @returns {Promise.<boolean>}
+             */
+            hasRole: (role) => {
+              return Role.count({
+                where: {
+                  code: role,
+                  ownerId: req[options.auth.model].id
+                },
+                limit: 1
+              }).then((data) => data == 1).catch((err) => res.database(err));
+            }
+          };
+
+          if (req.originalUrl == '/login' || req.originalUrl == '/register' || req.originalUrl == '/') {
+            logger.debug('Authentication: request passed by default allowed routes');
+            return next();
+          }
+
+          const allowResult = allow.some((r) => {
+            return r.test(req.originalUrl);
+          });
+
+          if (allowResult) {
+            logger.debug('Authentication: request passed by allow');
+            return next();
+          }
+
+          const requiredRoles = [];
+          routes.forEach((r) => {
+            if (r.match.test(req.originalUrl)) {
+              requiredRoles.push(r.role);
+            }
+          });
+
+          const userToken = req.get('token');
+          if (userToken == undefined) return res.unauthorized('You entered an area that requires authorization. Please send token in headers');
+          if (!/^[a-f0-9]{32}$/.test(userToken)) return res.unauthorized('Invalid token code');
+
+          Token.find({
+            include: [_gluon_auth_model],
+            where: {code: userToken}
+          }).then((token) => {
+            if (token == null || token.expire < new Date) return res.expiredToken('probably your token has been removed, please take new one');
+            token.expire = Token.defaultExpire();
+            token.save();
+
+            req[options.auth.model] = token[_gluon_auth_model.name];
+            Role.count({
+              where: {
+                ownerId: req[options.auth.model].id,
+                code: {
+                  $in: requiredRoles
+                }
+              }
+            }).then((count)=> {
+              if (count >= requiredRoles.length) return res.unauthorized('You do not have right roles to use this service');
+              next();
+            });
+
+          }).catch((err) => res.database(err))
+        });
+      }
+    } else {
+      logger.log('Authentication: authentication and role management disabled!');
+    }
+  } else {
+    logger.debug('Authentication: System ignored. Cause: {0}', options.auth ? 'authentication base invalid, only token supported' : 'no auth configuration');
+  }
+
   if (options.publicSource) {
     if (typeof options.publicSource == 'string') {
       const location = path.resolve(process.cwd(), options.dir, options.publicSource);
@@ -95,7 +274,7 @@ function Gluon (options) {
     } else if (options.publicSource == null) {
       logger.debug('There is no public folder');
     } else if (options.publicSource.constructor == Array) {
-      options.publicSource.forEach((source)=> {
+      options.publicSource.forEach((source) => {
         const location = path.resolve(process.cwd(), options.dir, source);
         app.use(express['static'](location));
         logger.debug('Folder {0} has been set as public', location);

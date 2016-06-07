@@ -507,3 +507,110 @@ router.all('/', (req, res) => {
 
 module.exports = router;
 ```
+
+
+### Authentication and role management
+With gluon 1.3.0 token based authentication generator released. Generator uses sequelize to communicate database. Creates 2 tables, "Role" and "Token".
+Before doing anything, make database connection correctly. Lets look properties
+
+config/default.json
+```javascript
+{
+    "gluon": {
+        "auth": {
+            "base": "token"
+        }
+    }
+}
+```
+
+gluon/auth only works if you set base = "token"
+
+config/default.json
+```javascript
+{
+    "gluon": {
+        "auth": {
+            "base": "token",
+            "model": "user", // which model is owner of token. Make sure your model is exist in your models folder.
+            "disable": false, // default= false, if you just disable authentication for some purpose, set this to true
+            "expire": 43200, // default=43200, how much seconds will be need for token to expire?
+            "allow": [
+                "/authentication/does/not/exist/in/this/path",
+                "/login", // default you can't block /login
+                "/register", // same here these are default.
+                "/dashboard",
+                "/blabla/:id", // you can do this too. but only format is ":xxxx" nothing more, simply makes ".*" regex
+                "regexp:^/damn/you/know+/regexp" // you can use regexp with this "regexp:" prefix
+            ],
+            "routes": {
+                "/admin": "admin", // simply /admin for only "admin" role owners
+                "/see": "canSee",
+                "/see/important": "important", // this route will require both "canSee" and "important" roles
+                "/edit/:id": "canEdit"
+            },
+            "token": "./token", // If you don't know what are you doing, Don't change this. This setting simply changes the token model
+            "role": "./role" // Same as here if you don't know bla bla.. Don't change it..
+        }
+    }
+}
+```
+
+Thats enough for configurations. Simply routes make static blocks. If you want to dynamic blocks you must use `req.auth`
+
+* `req.auth.login(model)`: creates token for model
+* `req.auth.logout()`: removes token
+* `req.auth.hasRole(role)`: checks for role
+* `req.auth.addRole(role)`: adds role
+* `req.auth.removeRole(role)`: removes role
+
+
+routes/login.js
+```javascript
+const gluon = require('gluon');
+const router = gluon.router();
+const User = require('../models/user');
+
+router.get('/', (req, res) => {
+    // controls etc..
+    // fetch model that defined in "gluon.auth.model"
+    User.find({
+        where: {}
+    }).then((user) => {
+        req.auth.login(user).then((token) => {
+            res.ok(token.code);
+        });
+    });
+});
+
+module.exports = router;
+```
+
+routes/someServiceThatHasAuthentication.js
+```javascript
+// note this route isn't allowed directly. Directly allowing means closing authentication for that route.
+const gluon = require('gluon');
+const router = gluon.router();
+
+router.get('/:id', (req, res) => {
+    // lets say i need to check some dynamic role "canEditDoor5"
+    req.auth.hasRole("canEditDoor" + req.params.id).then((has) => {
+        // if user has canEditDoor5 then has will be true
+    });
+
+    // you can add these roles by using some database tools or direct `req.auth.addRole`
+    req.auth.addRole("canEditDoor" + req.params.id).then((role) => {
+
+    });
+
+    // if you want to change some user's role then
+    const Role = require('gluon/role'); // gather role model
+    Role.addRole(id of user, "canEditDoor5").then((role) => {
+
+    });
+
+    // you ca
+});
+
+module.exports = router;
+```

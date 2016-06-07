@@ -1,0 +1,21 @@
+{
+  "gluon": {
+    "dir": "./src",
+    "listen": 600,
+
+    "auth": {
+      "base": "token",
+      "routes": {
+        "/test": "onlyMe"
+      }
+    }
+  },
+
+  "database": {
+    "dialect": "mysql",
+    "host": "localhost",
+    "database": "gluon_test",
+    "user": "root",
+    "password": ""
+  }
+}

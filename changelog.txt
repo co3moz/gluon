@@ -2,3 +2,10 @@
 
 ## 1.2.8
 * Fixed redefinition of colored prototypes.
+
+## 1.2.9
+* Database config now has all properties. Not just login credentials. (ex: timeout)
+
+## 1.3.0
+* Build-in Token Based Authentication
+* Build-in Role System
