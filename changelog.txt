@@ -9,3 +9,6 @@
 ## 1.3.0
 * Build-in Token Based Authentication
 * Build-in Role System
+
+## 1.3.1
+* Role system has very tiny bug, we fixed it.
