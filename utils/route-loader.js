@@ -21,7 +21,7 @@ module.exports = (files, app) => {
         location.pop();
         file.data.location = location.join('/');
         logger.debug('Route {name} loaded to /{data.location}', file);
-        app.use('/' + location, file.data);
+        app.use('/' + file.data.location, file.data);
       } else {
         logger.debug('Route {name} loaded to /{name}', file);
         app.use('/' + file.name, file.data);
