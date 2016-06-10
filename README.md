@@ -634,3 +634,17 @@ const app = gluon({
   }
 });
 ```
+
+
+### Parameter routes
+
+If you want to use parameter but you don't want to create single file. You can use `@name` syntax for folders. for ex:
+
+```javascript
+/routes/index.js -> /
+/routes/@id/index.js -> /:id
+/routes/dashboard/@dashboard_id/index.js -> /dasboard/:dashboard_id
+/routes/fridge/@id/index.js -> /fridge/:id
+/routes/fridge/@id/dashboard.js -> /fridge/:id/dashboard
+/routes/fridge/@id/temperature/@temperature_id.js -> /fridge/:id/temperature/:temperature_id
+```
