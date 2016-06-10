@@ -15,3 +15,6 @@
 
 #### 1.4.0
 * Routes now support "@name". You can make parameters with it. Ex: "./routes/fridge/@id/dashboard.js" -> "/fridge/:id/dashboard"
+
+#### 1.4.1
+* Fixed route index issue.

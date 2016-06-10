@@ -15,7 +15,8 @@ module.exports = (files, app) => {
       logger.debug('Route {name} loaded to /{data.location}', file);
       app.use('/' + file.data.location, file.data);
     } else {
-      if (file.name.endsWith('index.js')) {
+      file.name = file.name.replace(/@([^\\\/]+)/g, ":$1");
+      if (file.name.endsWith('index') && !file.name.endsWith(':index')) {
         var location = file.name.split('/');
         location.pop();
         file.data.location = location.join('/');
@@ -23,7 +24,7 @@ module.exports = (files, app) => {
         app.use('/' + location, file.data);
       } else {
         logger.debug('Route {name} loaded to /{name}', file);
-        app.use('/' + file.name.replace(/@([^\\\/]+)/g, ":$1"), file.data);
+        app.use('/' + file.name, file.data);
       }
     }
   });
