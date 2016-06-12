@@ -244,18 +244,21 @@ function Gluon (options) {
             token.save();
 
             req[options.auth.model] = token[_gluon_auth_model.name];
-            Role.count({
-              where: {
-                ownerId: req[options.auth.model].id,
-                code: {
-                  $in: requiredRoles
-                }
-              }
-            }).then((count)=> {
-              if (count != requiredRoles.length) return res.unauthorized('You do not have right roles to use this service');
+            if (requiredRoles.length == 0) {
               next();
-            });
-
+            } else {
+              Role.count({
+                where: {
+                  ownerId: req[options.auth.model].id,
+                  code: {
+                    $in: requiredRoles
+                  }
+                }
+              }).then((count)=> {
+                if (count != requiredRoles.length) return res.unauthorized('You do not have right roles to use this service');
+                next();
+              });
+            }
           }).catch((err) => res.database(err))
         });
       }

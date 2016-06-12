@@ -21,3 +21,6 @@
 
 #### 1.4.3
 * Added mergeParams option to gluon.router
+
+#### 1.4.4
+* If there is no role required then, just accept request directly, no need to use database for role checking at this moment.
