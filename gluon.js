@@ -50,7 +50,7 @@ try {
  * @param {{ip: String, port: Number}|Number} [options.listen] Should i listen?
  * @returns {app|*}
  */
-function Gluon(options) {
+function Gluon (options) {
   (options != undefined || (options = {}));
   Object.keys(defaults).forEach((key) => {
     if (options[key] == undefined) options[key] = defaults[key];
@@ -310,10 +310,13 @@ function Gluon(options) {
  * Gluon router
  * @param {String} [location] Override location?
  * @param {Boolean} [ignore=false] Ignore me when routes binding
+ * @param {Boolean} [mergeParams=true] Should i merge params
  * @returns {Router}
  */
-Gluon.router = (location, ignore) => {
-  var router = express.Router();
+Gluon.router = (location, ignore, mergeParams) => {
+  if (mergeParams == undefined) mergeParams = true;
+
+  var router = express.Router({mergeParams});
   router.location = location;
   router.ignore = ignore;
   return router;
