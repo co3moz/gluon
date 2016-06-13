@@ -563,7 +563,9 @@ Thats enough for configurations. Simply routes make static blocks. If you want t
 * `req.auth.hasRole(role)`: checks for role
 * `req.auth.addRole(role)`: adds role
 * `req.auth.removeRole(role)`: removes role
-
+* `req.auth.hasRoles(roles)`: checks for roles
+* `req.auth.addRoles(roles)`: adds roles
+* `req.auth.removeRoles(roles)`: removes roles
 
 routes/login.js
 ```javascript

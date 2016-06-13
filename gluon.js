@@ -177,10 +177,33 @@ function Gluon (options) {
 
 
             /**
+             * Adds a roles to owner
+             *
+             * @param {Array<String>} roles Which roles
+             * @returns {Promise.<Instance>}
+             */
+            addRoles: (roles) => {
+              roles.map((role) => Role.findOrCreate({
+                where: {
+                  code: role,
+                  ownerId: req[options.auth.model].id
+                },
+
+                defaults: {
+                  code: role,
+                  ownerId: req[options.auth.model].id
+                }
+              }).spread((role, created) => role).catch((err) => res.database(err)));
+
+              return Promise.all(roles);
+            },
+
+
+            /**
              * Removes a role from owner
              *
              * @param {String} role Which role
-             * @returns {Promise.<Integer>}
+             * @returns {Promise.<Number>}
              */
             removeRole: (role) => {
               return Role.destroy({
@@ -192,12 +215,29 @@ function Gluon (options) {
               }).catch((err) => res.database(err));
             },
 
+            /**
+             * Removes a role from owner
+             *
+             * @param {Array<String>} roles Which roles
+             * @returns {Promise.<Number>}
+             */
+            removeRoles: (roles) => {
+              return Role.destroy({
+                where: {
+                  code: {
+                    $in: roles
+                  },
+                  ownerId: req[options.auth.model].id
+                }
+              }).catch((err) => res.database(err));
+            },
+
 
             /**
              * Checks for role
              *
              * @param {String} role Which role
-             * @returns {Promise.<boolean>}
+             * @returns {Promise.<Boolean>}
              */
             hasRole: (role) => {
               return Role.count({
@@ -207,6 +247,23 @@ function Gluon (options) {
                 },
                 limit: 1
               }).then((data) => data == 1).catch((err) => res.database(err));
+            },
+
+            /**
+             * Checks for roles
+             *
+             * @param {Array<String>} roles Which roles
+             * @returns {Promise.<Boolean>}
+             */
+            hasRoles: (roles) => {
+              return Role.count({
+                where: {
+                  code: {
+                    $in: roles
+                  },
+                  ownerId: req[options.auth.model].id
+                }
+              }).then((data) => data == roles.length).catch((err) => res.database(err));
             }
           };
 

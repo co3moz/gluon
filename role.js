@@ -18,23 +18,55 @@ const Role = db.define('Role', {
     /**
      * Adds a role to owner
      * @memberOf Role
-     * @param ownerId Role added to who
-     * @param role Which role
+     * @param {Number} ownerId Role added to who
+     * @param {String} role Which role
      * @returns {Promise.<Instance>}
      */
     addRole: (ownerId, role) => {
-      return Role.create({
-        code: role,
-        ownerId: ownerId
+      return Role.findOrCreate({
+        where: {
+          code: role,
+          ownerId: ownerId
+        },
+
+        defaults: {
+          code: role,
+          ownerId: ownerId
+        }
       }).catch((err) => logger.error(err));
     },
+
+
+    /**
+     * Adds a roles to owner
+     * @memberOf Role
+     * @param {Number} ownerId Role added to who
+     * @param {Array<String>} roles Which roles
+     * @returns {Promise.<Instance>}
+     */
+    addRoles: (ownerId, roles) => {
+      roles.map((role) => Role.findOrCreate({
+        where: {
+          code: role,
+          ownerId: ownerId
+        },
+
+        defaults: {
+          code: role,
+          ownerId: ownerId
+        }
+      }).spread((role, created) => role).catch((err) => res.database(err)));
+
+      return Promise.all(roles);
+    },
+
 
     /**
      * Removes a role from owner
      * @memberOf Role
-     * @param ownerId Role added to who
-     * @param role Which role
-     * @returns {Promise.<Integer>}
+     * @param {Number} ownerId Role added to who
+     * @param {String} role Which role
+     * @returns {Promise.<Number>}
      */
     removeRole: (ownerId, role) => {
       return Role.destroy({
@@ -45,6 +77,26 @@ const Role = db.define('Role', {
         limit: 1
       }).catch((err) => logger.error(err));
     },
+
+
+    /**
+     * Removes a role from owner
+     * @memberOf Role
+     * @param {Number} ownerId Role added to who
+     * @param {Array<String>} roles Which roles
+     * @returns {Promise.<Number>}
+     */
+    removeRoles: (ownerId, roles) => {
+      return Role.destroy({
+        where: {
+          code: {
+            $in: roles
+          },
+          ownerId: ownerId
+        }
+      }).catch((err) => logger.error(err));
+    },
+
 
     /**
      * Checks for role
@@ -61,12 +113,32 @@ const Role = db.define('Role', {
         },
         limit: 1
       }).then((data) => data == 1).catch((err) => logger.error(err));
+    },
+
+
+    /**
+     * Checks for roles
+     * @memberof Role
+     * @param {Number} ownerId Role added to who
+     * @param {Array<String>} roles Which roles
+     * @returns {Promise.<boolean>}
+     */
+    hasRoles: (ownerId, roles) => {
+      return Role.count({
+        where: {
+          code: {
+            $in: roles
+          },
+          ownerId: ownerId
+        }
+      }).then((data) => data == roles.length).catch((err) => res.database(err));
     }
   }
 });
 
-const User = global._gluon_auth_model;
+const Owner = global._gluon_auth_model;
 
-User.hasMany(Role, {as: 'roles', foreignKey: 'ownerId'});
+Role.belongsTo(Owner, {foreignKey: 'ownerId'});
+Owner.hasMany(Role, {foreignKey: 'ownerId'});
 
 module.exports = Role;
