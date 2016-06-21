@@ -97,6 +97,23 @@ function Gluon (options) {
     });
   }
 
+
+  if (options.publicSource) {
+    if (typeof options.publicSource == 'string') {
+      const location = path.resolve(process.cwd(), options.dir, options.publicSource);
+      app.use(express['static'](location));
+      logger.debug('Folder {0} has been set as public', location);
+    } else if (options.publicSource == null) {
+      logger.debug('There is no public folder');
+    } else if (options.publicSource.constructor == Array) {
+      options.publicSource.forEach((source) => {
+        const location = path.resolve(process.cwd(), options.dir, source);
+        app.use(express['static'](location));
+        logger.debug('Folder {0} has been set as public', location);
+      });
+    }
+  }
+
   if (options.auth && options.auth.base == "token") {
     options.auth = Object.assign(authDefaults, options.auth);
     if (options.auth.disable == false || options.auth.disable == undefined || options.auth.disable == "false") {
@@ -324,22 +341,6 @@ function Gluon (options) {
     }
   } else {
     logger.debug('Authentication: System ignored. Cause: {0}', options.auth ? 'authentication base invalid, only token supported' : 'no auth configuration');
-  }
-
-  if (options.publicSource) {
-    if (typeof options.publicSource == 'string') {
-      const location = path.resolve(process.cwd(), options.dir, options.publicSource);
-      app.use(express['static'](location));
-      logger.debug('Folder {0} has been set as public', location);
-    } else if (options.publicSource == null) {
-      logger.debug('There is no public folder');
-    } else if (options.publicSource.constructor == Array) {
-      options.publicSource.forEach((source) => {
-        const location = path.resolve(process.cwd(), options.dir, source);
-        app.use(express['static'](location));
-        logger.debug('Folder {0} has been set as public', location);
-      });
-    }
   }
 
 

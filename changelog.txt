@@ -27,3 +27,6 @@
 
 #### 1.5.0
 * Added hasRoles, addRoles, removeRoles functions to role management.
+
+#### 1.5.1
+* Public sources should not require authentication. We allowed them now.
