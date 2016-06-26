@@ -30,3 +30,6 @@
 
 #### 1.5.1
 * Public sources should not require authentication. We allowed them now.
+
+#### 1.5.2
+* License added to folder.
