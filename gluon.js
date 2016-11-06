@@ -31,6 +31,7 @@ try {
   Object.assign(defaults, gluonDefaults);
 } catch (e) {
   // if there is no config installation than ignore
+  logger.debug('config package doesn\'t exists.');
 }
 
 /**
@@ -117,7 +118,7 @@ function Gluon (options) {
   if (options.auth && options.auth.base == "token") {
     options.auth = Object.assign(authDefaults, options.auth);
     if (options.auth.disable == false || options.auth.disable == undefined || options.auth.disable == "false") {
-      const authLocation = path.resolve(process.cwd(), options.dir, options.models, options.auth.model);
+      var authLocation = path.resolve(process.cwd(), options.dir, options.models, options.auth.model);
       try {
         global._gluon_auth_model = require(authLocation);
         global._gluon_auth_expire = options.auth.expire;
@@ -129,11 +130,12 @@ function Gluon (options) {
         const Token = require(options.auth.token);
         const Role = require(options.auth.role);
 
-        const allow = options.auth.allow ? options.auth.allow.map((route, i) => {
+        //noinspection JSUnresolvedVariable
+        var allow = options.auth.allow ? options.auth.allow.map((route) => {
           return new RegExp(route.indexOf("regexp:") == 0 ? route.substring(7) : "^" + route.replace(/:[^\\/]+/g, '.*'));
         }) : [];
 
-        const routes = Object.keys(options.auth.routes || {}).map((route, i) => {
+        var routes = Object.keys(options.auth.routes || {}).map((route) => {
           return {
             match: new RegExp(route.indexOf("regexp:") == 0 ? route.substring(7) : "^" + route.replace(/:[^\\/]+/g, '.*')),
             role: options.auth.routes[route]
@@ -141,6 +143,7 @@ function Gluon (options) {
         });
 
         app.use((req, res, next) => {
+          //noinspection JSValidateJSDoc
           /**
            * Authentication protocol for gluon
            */
@@ -333,6 +336,102 @@ function Gluon (options) {
                 next();
               });
             }
+          }).catch((err) => res.database(err))
+        });
+      }
+    } else {
+      logger.log('Authentication: authentication and role management disabled!');
+    }
+  }
+  else if (options.auth && options.auth.base == "token-redis") {
+    options.auth = Object.assign(authDefaults, options.auth);
+    if (options.auth.disable == false || options.auth.disable == undefined || options.auth.disable == "false") {
+      var authLocation = path.resolve(process.cwd(), options.dir, options.models, options.auth.model);
+      try {
+        global._gluon_auth_model = require(authLocation);
+        global._gluon_auth_expire = options.auth.expire;
+      } catch (e) {
+        logger.error('Auth model is not exist in {0}', authLocation);
+      }
+
+      if (global._gluon_auth_model) {
+        var allow = options.auth.allow ? options.auth.allow.map((route, i) => {
+          return new RegExp(route.indexOf("regexp:") == 0 ? route.substring(7) : "^" + route.replace(/:[^\\/]+/g, '.*'));
+        }) : [];
+
+        var routes = Object.keys(options.auth.routes || {}).map((route, i) => {
+          return {
+            match: new RegExp(route.indexOf("regexp:") == 0 ? route.substring(7) : "^" + route.replace(/:[^\\/]+/g, '.*')),
+            role: options.auth.routes[route]
+          };
+        });
+
+        const md5 = require('js-md5');
+        const redisClient = require('./redis');
+
+        app.use((req, res, next) => {
+          //noinspection JSValidateJSDoc
+          req.auth = {
+            /**
+             * Creates a token for model
+             * @param {Model} model
+             * @returns {Promise.<TResult>}
+             */
+            login: (model) => {
+              const tokenCode = 'token-' + md5(new Date().toString()) + md5(model.id + Math.random().toString());
+              const redisExpire = (global._gluon_auth_expire) >>> 0; //redis using seconds not milliseconds
+              return redisClient.setAsync(tokenCode, JSON.stringify(model.toJSON())).then(function () {
+                return redisClient.expireAsync(tokenCode, redisExpire);
+              }).then(function () {
+                return {code: tokenCode, expire: new Date(Date.now() + redisExpire * 1000)};
+              });
+            },
+
+            update: (model) => {
+              const tokenCode = req.get('token');
+              const redisExpire = (global._gluon_auth_expire) >>> 0; //redis using seconds not milliseconds
+              return redisClient.setAsync(tokenCode, JSON.stringify(model.toJSON())).then(function () {
+                return redisClient.expireAsync(tokenCode, redisExpire);
+              }).then(function () {
+                return {code: tokenCode, expire: new Date(Date.now() + redisExpire * 1000)};
+              });
+            },
+
+
+            /**
+             * Removes token from owner
+             * @returns {Promise.<TResult>}
+             */
+            logout: () => {
+              return redisClient.delAsync(req.get('token'));
+            }
+          };
+
+          if (req.originalUrl == '/login' || req.originalUrl == '/register' || req.originalUrl == '/') {
+            logger.debug('Authentication: request passed by default allowed routes');
+            return next();
+          }
+
+          const allowResult = allow.some((r) => {
+            return r.test(req.originalUrl);
+          });
+
+          if (allowResult) {
+            logger.debug('Authentication: request passed by allow');
+            return next();
+          }
+
+          const userToken = req.get('token');
+          if (userToken == undefined) return res.unauthorized('You entered an area that requires authorization. Please send token in headers');
+          if (!/^token-[a-f0-9]{64}$/.test(userToken)) return res.unauthorized('Invalid token code');
+
+          redisClient.getAsync(userToken).then((model) => {
+            if (model == null) return res.unauthorized('Invalid token code');
+            const redisExpire = (global._gluon_auth_expire) >>> 0; //redis using seconds not milliseconds
+            redisClient.expireAsync(userToken, redisExpire);
+
+            req[options.auth.model] = JSON.parse(model);
+            next();
           }).catch((err) => res.database(err))
         });
       }

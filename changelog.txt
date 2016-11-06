@@ -33,3 +33,6 @@
 
 #### 1.5.2
 * License added to folder.
+
+#### 1.6.0
+* token-redis authentication support
