@@ -2,68 +2,68 @@ var sequelizeErrors;
 
 try {
   sequelizeErrors = require('sequelize/lib/errors');
-} catch(e) {
+} catch (e) {
   // generic doesn't require sequelize, but if you use res.database then you get error.
 }
 
-const logger = require('../logger');
+var logger = require('../logger');
 
-module.exports = (app) => {
-  app.use((req, res, next) => {
-    res.ok = (json) => {
+module.exports = function (app) {
+  app.use(function (req, res, next) {
+    res.ok = function (json) {
       res.json(json);
     };
 
-    res.notFound = (info) => {
+    res.notFound = function (info) {
       res.status(404);
       res.json({
         error: true,
-        info
+        info: info
       });
     };
 
-    res.badRequest = (requiredFields) => {
+    res.badRequest = function (requiredFields) {
       res.status(400);
       res.json({
         error: true,
-        requiredFields
+        requiredFields: requiredFields
       });
     };
 
-    res.validation = (type, fields) => {
+    res.validation = function (type, fields) {
       res.status(400);
       res.json({
         error: true,
-        type,
-        fields
+        type: type,
+        fields: fields
       });
     };
 
-    res.unauthorized = (info) => {
+    res.unauthorized = function (info) {
       res.status(401);
       res.json({
         error: true,
-        info
+        info: info
       });
     };
 
-    res.redirectRequest = (info) => {
+    res.redirectRequest = function (info) {
       res.status(417);
       res.json({
         error: true,
-        info
+        info: info
       });
     };
 
-    res.unknown = (info) => {
+    res.unknown = function (info) {
       res.status(500);
       res.json({
         error: true,
-        info
+        info: info
       });
     };
 
-    res.database = (err) => {
+    res.database = function (err) {
       if (err instanceof sequelizeErrors.UniqueConstraintError) {
         return res.validation(err.name, err.errors);
       } else if (err instanceof sequelizeErrors.ValidationError) {
@@ -78,11 +78,11 @@ module.exports = (app) => {
       logger.error('Request returned a database error:\n{stack}', err);
     };
 
-    res.expiredToken = (info) => {
+    res.expiredToken = function (info) {
       res.status(408);
       res.json({
         error: true,
-        info
+        info: info
       });
     };
 

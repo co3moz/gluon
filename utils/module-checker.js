@@ -2,7 +2,7 @@
  * Module existence checker
  * @param {Array<String>} modules Which modules will be checked
  */
-module.exports = (modules) => {
+module.exports = function(modules) {
   var i = 0;
   try {
     for (; i < modules.length; i++) {

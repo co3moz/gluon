@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const ezFormat = require('ezformat');
+var fs = require('fs');
+var path = require('path');
+var os = require('os');
+var ezFormat = require('ezformat');
 
 var defaults = {
   dir: './logs',
@@ -40,7 +40,7 @@ var color = {
  * @property {String} cyan
  * @property {String} white
  */
-Object.keys(color).forEach((c) => {
+Object.keys(color).forEach(function (c) {
   if (!String.prototype[c]) {
     Object.defineProperty(String.prototype, c, {
       get: function () {
@@ -51,8 +51,8 @@ Object.keys(color).forEach((c) => {
 });
 
 try {
-  const config = require('config');
-  const loggerDefaults = config.get('logger');
+  var config = require('config');
+  var loggerDefaults = config.get('logger');
   Object.assign(defaults, loggerDefaults);
 } catch (e) {
   // if there is no config installation than ignore
@@ -124,8 +124,8 @@ function Logger() {
    * @returns {String}
    * @private
    */
-  this._prepareMessage = (type, message) => {
-    const simple = {
+  this._prepareMessage = function (type, message) {
+    var simple = {
       type: this.colorType(type),
       message: typeof message == 'string' ? message : os.EOL + "{0 j 4}".format(message)
     };
@@ -135,20 +135,20 @@ function Logger() {
       case 'withFile':
         return this.get('withFile').format(Object.assign(simple, this._getActiveFunction()));
       default:
-        const now = new Date();
-        const date = this.get('dateFormat').format({
+        var now = new Date();
+        var date = this.get('dateFormat').format({
           year: now.getFullYear(),
           month: now.getMonth() + 1,
           day: now.getDate()
         });
-        const time = this.get('timeFormat').format({
+        var time = this.get('timeFormat').format({
           hour: now.getHours(),
           minute: now.getMinutes(),
           second: now.getSeconds()
         });
         return (this.get(this.get('type')) || "").format(Object.assign(simple, {
-          date,
-          time
+          date: date,
+          time: time
         }, this._getActiveFunction()));
     }
   };
@@ -158,14 +158,14 @@ function Logger() {
    * @param message
    * @private
    */
-  this._logToFile = (message) => {
-    const now = new Date();
-    const date = this.get('fileDateFormat').format({
+  this._logToFile = function (message) {
+    var now = new Date();
+    var date = this.get('fileDateFormat').format({
       year: now.getFullYear(),
       month: now.getMonth() + 1,
       day: now.getDate()
     });
-    const location = path.resolve(process.cwd(), this.get('dir'), this.get('fileFormat').format({date}));
+    var location = path.resolve(process.cwd(), this.get('dir'), this.get('fileFormat').format({date: date}));
     fs.appendFile(location, (message + os.EOL).replace(/\x1B\[\d+m/g, ''));
   };
 
@@ -174,7 +174,7 @@ function Logger() {
    * Detect recording level
    * @returns {number}
    */
-  this.level = () => {
+  this.level = function () {
     switch (this.get('level')) {
       case 'DEBUG':
         return 0;
@@ -193,7 +193,7 @@ function Logger() {
    * Colored type
    * @returns {String}
    */
-  this.colorType = (type) => {
+  this.colorType = function (type) {
     switch (type) {
       case 'DEBUG':
         return type.yellow;
@@ -215,7 +215,9 @@ function Logger() {
    * @param {*} value
    * @return {String}
    */
-  this.set = (setting, value) => defaults[setting] = value;
+  this.set = function (setting, value) {
+    return defaults[setting] = value
+  };
 
 
   /**
@@ -223,7 +225,9 @@ function Logger() {
    * @param {String} setting
    * @return {String}
    */
-  this.get = (setting) => defaults[setting];
+  this.get = function (setting) {
+    return defaults[setting]
+  };
 
 
   /**
@@ -232,29 +236,31 @@ function Logger() {
    * @returns {{file: String, line: String}}
    * @private
    */
-  this._getActiveFunction = (at) => {
-    const temp = {};
-    const stackTraceLimit = Error.stackTraceLimit;
-    const prepareStackTrace = Error.prepareStackTrace;
+  this._getActiveFunction = function (at) {
+    var temp = {};
+    var stackTraceLimit = Error.stackTraceLimit;
+    var prepareStackTrace = Error.prepareStackTrace;
     Error.stackTraceLimit = Infinity;
 
-    Error.prepareStackTrace = (dummyObject, v8StackTrace) => v8StackTrace;
+    Error.prepareStackTrace = function (dummyObject, v8StackTrace) {
+      return v8StackTrace
+    };
     Error.captureStackTrace(temp);
 
-    const stack = temp.stack[at || 3];
+    var stack = temp.stack[at || 3];
     Error.prepareStackTrace = prepareStackTrace;
     Error.stackTraceLimit = stackTraceLimit;
 
-    const file = stack["getEvalOrigin"]().split(/\\|\//).pop().blue;
-    const line = stack["getLineNumber"]().toString().magenta;
-    return {file, line};
+    var file = stack["getEvalOrigin"]().split(/\\|\//).pop().blue;
+    var line = stack["getLineNumber"]().toString().magenta;
+    return {file: file, line: line};
   };
 
   /**
    * Check's logging directory's existence, if not then creates
    */
-  this.checkDirectory = () => {
-    const location = (path.resolve(process.cwd(), this.get('dir')));
+  this.checkDirectory = function () {
+    var location = (path.resolve(process.cwd(), this.get('dir')));
     var dirs = location.split(path.sep), root = "";
 
     while (dirs.length > 0) {

@@ -36,3 +36,7 @@
 
 #### 1.6.0
 * token-redis authentication support
+
+#### 1.7.0
+* support node 4.x
+

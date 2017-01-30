@@ -1,11 +1,11 @@
 require('./utils/module-checker')(['sequelize']);
 
-const Sequelize = require('sequelize');
-const db = require('./db');
-const md5 = require('js-md5');
-const logger = require('./logger');
+var Sequelize = require('sequelize');
+var db = require('./db');
+var md5 = require('js-md5');
+var logger = require('./logger');
 
-const Role = db.define('Role', {
+var Role = db.define('Role', {
   code: {
     type: Sequelize.STRING(64),
     allowNull: false,
@@ -22,7 +22,7 @@ const Role = db.define('Role', {
      * @param {String} role Which role
      * @returns {Promise.<Instance>}
      */
-    addRole: (ownerId, role) => {
+    addRole: function(ownerId, role)  {
       return Role.findOrCreate({
         where: {
           code: role,
@@ -33,7 +33,7 @@ const Role = db.define('Role', {
           code: role,
           ownerId: ownerId
         }
-      }).catch((err) => logger.error(err));
+      }).catch(function(err) {logger.error(err)});
     },
 
 
@@ -44,8 +44,8 @@ const Role = db.define('Role', {
      * @param {Array<String>} roles Which roles
      * @returns {Promise.<Instance>}
      */
-    addRoles: (ownerId, roles) => {
-      roles.map((role) => Role.findOrCreate({
+    addRoles: function(ownerId, roles)  {
+      roles.map(function(role) { return Role.findOrCreate({
         where: {
           code: role,
           ownerId: ownerId
@@ -55,7 +55,7 @@ const Role = db.define('Role', {
           code: role,
           ownerId: ownerId
         }
-      }).spread((role, created) => role).catch((err) => res.database(err)));
+      }).spread(function(role, created) { return role}).catch(function(err) { res.database(err)})});
 
       return Promise.all(roles);
     },
@@ -68,14 +68,14 @@ const Role = db.define('Role', {
      * @param {String} role Which role
      * @returns {Promise.<Number>}
      */
-    removeRole: (ownerId, role) => {
+    removeRole: function(ownerId, role)  {
       return Role.destroy({
         where: {
           code: role,
           ownerId: ownerId
         },
         limit: 1
-      }).catch((err) => logger.error(err));
+      }).catch(function(err) { res.database(err)});
     },
 
 
@@ -86,7 +86,7 @@ const Role = db.define('Role', {
      * @param {Array<String>} roles Which roles
      * @returns {Promise.<Number>}
      */
-    removeRoles: (ownerId, roles) => {
+    removeRoles: function(ownerId, roles)  {
       return Role.destroy({
         where: {
           code: {
@@ -94,7 +94,7 @@ const Role = db.define('Role', {
           },
           ownerId: ownerId
         }
-      }).catch((err) => logger.error(err));
+      }).catch(function(err) { res.database(err)});
     },
 
 
@@ -105,14 +105,14 @@ const Role = db.define('Role', {
      * @param role Which role
      * @returns {Promise.<boolean>}
      */
-    hasRole: (ownerId, role) => {
+    hasRole: function(ownerId, role) {
       return Role.count({
         where: {
           code: role,
           ownerId: ownerId
         },
         limit: 1
-      }).then((data) => data == 1).catch((err) => logger.error(err));
+      }).then(function(data) { return data == 1}).catch(function(err) { res.database(err)});
     },
 
 
@@ -123,7 +123,7 @@ const Role = db.define('Role', {
      * @param {Array<String>} roles Which roles
      * @returns {Promise.<boolean>}
      */
-    hasRoles: (ownerId, roles) => {
+    hasRoles: function(ownerId, roles)  {
       return Role.count({
         where: {
           code: {
@@ -131,12 +131,12 @@ const Role = db.define('Role', {
           },
           ownerId: ownerId
         }
-      }).then((data) => data == roles.length).catch((err) => res.database(err));
+      }).then(function(data)  {return data == roles.length} ).catch(function(err) { res.database(err)});
     }
   }
 });
 
-const Owner = global._gluon_auth_model;
+var Owner = global._gluon_auth_model;
 
 Role.belongsTo(Owner, {foreignKey: 'ownerId'});
 Owner.hasMany(Role, {foreignKey: 'ownerId'});

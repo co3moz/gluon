@@ -1,7 +1,7 @@
-const path = require('path');
-const glob = require('glob');
-const firstBy = require('thenby');
-const logger = require('../logger');
+var path = require('path');
+var glob = require('glob');
+var firstBy = require('thenby');
+var logger = require('../logger');
 
 /**
  * Module existance checker
@@ -22,15 +22,15 @@ module.exports = function () {
 
   logger.debug('Looking js files in {0} directory', dir);
   glob(dir + '/**/*.js', function (err, files) {
-    const mix = files.map(file => {
+    var mix = files.map(function(file) {
       return {
         name: file.substring(dir.length + 1, file.length - 3),
         slash: (file.match(/\//g) || []).length,
         data: require(file)
       }
-    }).sort(firstBy(v => v.slash, -1)
-      .thenBy(v => +(v.name.indexOf('index') == -1), -1)
-      .thenBy((a, b) => a.name.localeCompare(b.name))
+    }).sort(firstBy(function(v) { return v.slash } , -1)
+      .thenBy(function(v) { return +(v.name.indexOf('index') == -1)}, -1)
+      .thenBy(function(a, b) { return  a.name.localeCompare(b.name)})
     );
 
     if (callback) callback(mix);

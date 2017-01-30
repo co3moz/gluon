@@ -1,15 +1,15 @@
 require('./utils/module-checker')(['js-md5']);
 
-const md5 = require('js-md5');
-const control = require("./control");
+var md5 = require('js-md5');
+var control = require("./control");
 
 /**
  * Generic model route generator
  * @param {Router} route
  * @param {*} model
  */
-module.exports = (route, model) => {
-  route.get('/', (req, res) => {
+module.exports = function (route, model) {
+  route.get('/', function (req, res) {
     res.json({
       paths: [
         'GET /',
@@ -27,78 +27,92 @@ module.exports = (route, model) => {
   });
 
 
-  route.get('/all', (req, res) => {
-    const page = req.query.page || 0;
+  route.get('/all', function (req, res) {
+    var page = req.query.page || 0;
 
-    model.findAndCountAll({offset: page * 20, limit: 20}).then(data => {
+    model.findAndCountAll({offset: page * 20, limit: 20}).then(function (data) {
       if (data == null) return res.notFound('{name} table is empty'.format(model));
 
       res.header("totalRows", data.count);
       res.ok(data.rows);
-    }).catch(err => res.database(err));
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 
 
-  route.get('/count', (req, res) => {
-    model.count().then(data => {
+  route.get('/count', function (req, res) {
+    model.count().then(function (data) {
       if (data == null) return res.notFound('{name} table is empty'.format(model));
 
       res.ok(data);
-    }).catch(err => res.database(err));
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 
-  route.post('/all', (req, res) => {
+  route.post('/all', function (req, res) {
     if (Object.keys(req.body).length == 0) return res.badRequest('{name} filter requires body'.format(model));
 
-    const page = req.query.page || 0;
+    var page = req.query.page || 0;
 
-    model.findAndCountAll({where: req.body, offset: page * 20, limit: 20}).then(data => {
+    model.findAndCountAll({where: req.body, offset: page * 20, limit: 20}).then(function (data) {
       if (data == null) return res.notFound('{name} filter returned nothing'.format(model));
 
       res.header("totalRows", data.count);
       res.ok(data.rows);
-    }).catch(err => res.database(err));
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 
 
-  route.post('/count', (req, res) => {
+  route.post('/count', function (req, res) {
     if (Object.keys(req.body).length == 0) return res.badRequest('{name} filter requires body'.format(model));
 
-    model.count({where: req.body}).then(data => {
+    model.count({where: req.body}).then(function (data) {
       if (data == null) return res.notFound('{name} filter returned nothing'.format(model));
 
       res.ok(data);
-    }).catch(err => res.database(err));
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 
 
-  route.get('/:id', (req, res) => {
-    model.findById(req.params.id).then(data => {
+  route.get('/:id', function (req, res) {
+    model.findById(req.params.id).then(function (data) {
       if (data == null)  return res.notFound('{name} #{1.id} cannot be found'.format(model, req.params));
 
       res.ok(data);
-    }).catch(err => res.database(err));
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 
 
-  route.patch('/:id', (req, res) => {
+  route.patch('/:id', function (req, res) {
     if (req.body.password) { // password is auto-hashing
       if (!/^[a-f0-9]{32}$/.test(req.body.password)) {
         req.body.password = md5(req.body.password);
       }
     }
 
-    model.findById(req.body.id || req.params.id).then(data => {
+    model.findById(req.body.id || req.params.id).then(function (data) {
       if (data == null)  return res.notFound('{name} #{1.id} cannot be found'.format(model, req.params));
 
-      data.update(req.body).then(data => {
+      data.update(req.body).then(function (data) {
         res.ok(data);
-      }).catch(err => res.database(err));
-    }).catch(err => res.database(err));
+      }).catch(function (err) {
+        res.database(err)
+      });
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 
 
-  route.post('/', control(model, false), (req, res) => {
+  route.post('/', control(model, false), function (req, res) {
     if (req.body.password) { // password is auto-hashing
       if (!/^[a-f0-9]{32}$/.test(req.body.password)) {
         req.body.password = md5(req.body.password);
@@ -109,21 +123,23 @@ module.exports = (route, model) => {
       req.body.userId = req.session.user.id;
     }
 
-    model.create(req.body).then(data => {
+    model.create(req.body).then(function (data) {
       res.ok(data);
-    }).catch(err => {
-      res.database(err);
+    }).catch(function (err) {
+      res.database(err)
     });
   });
 
 
-  route.delete('/:id', (req, res) => {
-    model.findById(req.body.id || req.params.id).then(data => {
+  route.delete('/:id', function (req, res) {
+    model.findById(req.body.id || req.params.id).then(function (data) {
       if (data == null)  return res.notFound('{name} #{1.id} cannot be found'.format(model, req.params));
 
-      data.destroy().then(data => {
+      data.destroy().then(function (data) {
         res.ok(data);
       });
-    }).catch(err => res.database(err));
+    }).catch(function (err) {
+      res.database(err)
+    });
   });
 };

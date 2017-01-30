@@ -11,15 +11,19 @@
  * var address = require('../models/address');
  * m(address)
  */
-module.exports = (need, id) => {
+module.exports = function (need, id) {
   (id != undefined || (id = true));
 
   if (need.constructor != Array) {
-    need = Object.keys(need.attributes).filter(x=> (id || x != 'id') && (x != 'createdAt') && (x != 'updatedAt') && (x != 'userId') && (need.attributes[x].references != undefined || need.attributes[x].allowNull == false))
+    need = Object.keys(need.attributes).filter(
+      function (x) {
+        return (id || x != 'id') && (x != 'createdAt') && (x != 'updatedAt') && (x != 'userId') && (need.attributes[x].references != undefined || need.attributes[x].allowNull == false);
+      }
+    )
   }
 
-  return (req, res, next) => {
-    var result = need.every((o) => {
+  return function (req, res, next) {
+    var result = need.every(function (o) {
       return req.body[o] != undefined;
     });
 

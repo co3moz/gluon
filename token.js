@@ -1,10 +1,10 @@
 require('./utils/module-checker')(['js-md5', 'sequelize']);
 
-const Sequelize = require('sequelize');
-const db = require('./db');
-const md5 = require('js-md5');
+var Sequelize = require('sequelize');
+var db = require('./db');
+var md5 = require('js-md5');
 
-const Token = db.define('Token', {
+var Token = db.define('Token', {
   code: {
     type: Sequelize.STRING,
     allowNull: false,
@@ -24,7 +24,7 @@ const Token = db.define('Token', {
      * @memberof Token
      * @returns {String}
      */
-    generateCode: () => {
+    generateCode: function() {
       return md5(new Date().toString());
     },
 
@@ -32,7 +32,7 @@ const Token = db.define('Token', {
      * @memberof Token
      * @returns {Date}
      */
-    defaultExpire: () => {
+    defaultExpire: function () {
       return new Date(Date.now() + global._gluon_auth_expire * 1000);
     }
   },
@@ -41,7 +41,7 @@ const Token = db.define('Token', {
   }]
 });
 
-const User = global._gluon_auth_model;
+var User = global._gluon_auth_model;
 
 Token.belongsTo(User, {foreignKey: "ownerId"});
 

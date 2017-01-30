@@ -1,13 +1,13 @@
 require('./utils/module-checker')(['redis', 'config', 'bluebird']);
-const logger = require('./logger');
+var logger = require('./logger');
 
-const redis = require('redis');
-const config = require('config');
-const bluebird = require('bluebird');
+var redis = require('redis');
+var config = require('config');
+var bluebird = require('bluebird');
 
 bluebird.promisifyAll(redis.RedisClient.prototype);
 
-const redisConfiguration = config.get('redis');
+var redisConfiguration = config.get('redis');
 
 logger.log('Connecting to redis...');
 

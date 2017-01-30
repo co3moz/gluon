@@ -1,4 +1,4 @@
-const logger = require('../logger');
+var logger = require('../logger');
 
 /**
  * Object to express app notation
@@ -6,8 +6,8 @@ const logger = require('../logger');
  * @param files {Object}
  * @param app {Object}
  */
-module.exports = (files, app) => {
-  files.forEach((file) => {
+module.exports = function(files, app)  {
+  files.forEach(function(file)  {
     if (file.data == null || file.data.name != 'router') return logger.error('Cannot load router {name}, make it by gluon.router', file);
     if (file.data.ignore == true) return logger.debug('Route {name} ignored', file);
 
