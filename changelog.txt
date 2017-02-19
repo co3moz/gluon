@@ -40,3 +40,5 @@
 #### 1.7.0
 * support node 4.x
 
+#### 1.7.1
+* logger now has "var" variable.

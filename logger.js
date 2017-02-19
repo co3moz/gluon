@@ -127,7 +127,8 @@ function Logger() {
   this._prepareMessage = function (type, message) {
     var simple = {
       type: this.colorType(type),
-      message: typeof message == 'string' ? message : os.EOL + "{0 j 4}".format(message)
+      message: typeof message == 'string' ? message : os.EOL + "{0 j 4}".format(message),
+      var: defaults
     };
     switch (this.get('type')) {
       case 'simple':

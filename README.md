@@ -650,3 +650,25 @@ If you want to use parameter but you don't want to create single file. You can u
 /routes/fridge/@id/dashboard.js -> /fridge/:id/dashboard
 /routes/fridge/@id/temperature/@temperature_id.js -> /fridge/:id/temperature/:temperature_id
 ```
+
+### Logger special variables
+
+app.js
+
+```javascript
+var logger = require('gluon/logger');
+var cluster = require('cluster');
+logger.set('worker_id', cluster.worker ? cluster.worker.id : '-');
+```
+
+config
+
+```javascript
+{
+  "logger": {
+    "level": "LOG",
+    "type": "clusterLogger",
+    "clusterLogger": "WORKER {var.worker_id} {date} {time} {type} {file}:{line} {message}"
+  }
+}
+```
