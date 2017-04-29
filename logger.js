@@ -167,7 +167,7 @@ function Logger() {
       day: now.getDate()
     });
     var location = path.resolve(process.cwd(), this.get('dir'), this.get('fileFormat').format({date: date}));
-    fs.appendFile(location, (message + os.EOL).replace(/\x1B\[\d+m/g, ''));
+    fs.appendFile(location, (message + os.EOL).replace(/\x1B\[\d+m/g, ''), function() {});
   };
 
 
