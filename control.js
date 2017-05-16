@@ -24,7 +24,7 @@ module.exports = function (need, id) {
 
   return function (req, res, next) {
     var result = need.every(function (o) {
-      return req.body[o] != undefined;
+      return req.body.hasOwnProperty(o);
     });
 
     if (result == false) {

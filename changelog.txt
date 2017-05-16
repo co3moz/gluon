@@ -46,3 +46,6 @@
 #### 1.7.2
 * fixed deprecation warning error
 
+#### 1.7.3
+* fixed gluon/control's control mechanism on nullable fields.
+
