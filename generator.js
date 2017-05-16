@@ -29,8 +29,9 @@ module.exports = function (route, model) {
 
   route.get('/all', function (req, res) {
     var page = req.query.page || 0;
+    var order = req.query.order || "";
 
-    model.findAndCountAll({offset: page * 20, limit: 20}).then(function (data) {
+    model.findAndCountAll({offset: page * 20, limit: 20, order: order}).then(function (data) {
       if (data == null) return res.notFound('{name} table is empty'.format(model));
 
       res.header("totalRows", data.count);
@@ -55,8 +56,9 @@ module.exports = function (route, model) {
     if (Object.keys(req.body).length == 0) return res.badRequest('{name} filter requires body'.format(model));
 
     var page = req.query.page || 0;
+    var order = req.query.order || "";
 
-    model.findAndCountAll({where: req.body, offset: page * 20, limit: 20}).then(function (data) {
+    model.findAndCountAll({where: req.body, offset: page * 20, limit: 20, order: order}).then(function (data) {
       if (data == null) return res.notFound('{name} filter returned nothing'.format(model));
 
       res.header("totalRows", data.count);

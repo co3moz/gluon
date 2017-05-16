@@ -49,3 +49,6 @@
 #### 1.7.3
 * fixed gluon/control's control mechanism on nullable fields.
 
+#### 1.7.4
+* fixed gluon/control's added order for /all
+
