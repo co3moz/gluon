@@ -121,8 +121,8 @@ module.exports = function (route, model) {
       }
     }
 
-    if (model.attributes.userId) {
-      req.body.userId = req.session.user.id;
+    if (model.attributes.userId && req.body.userId == undefined) {
+      req.body.userId = req.user.id;
     }
 
     model.create(req.body).then(function (data) {

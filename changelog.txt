@@ -52,3 +52,5 @@
 #### 1.7.4
 * fixed gluon/control's added order for /all
 
+#### 1.7.5
+* fixed gluon/control's create, userId auto complete bug.
