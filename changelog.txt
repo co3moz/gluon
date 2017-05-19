@@ -53,4 +53,7 @@
 * fixed gluon/control's added order for /all
 
 #### 1.7.5
-* fixed gluon/control's create, userId auto complete bug.
+* fixed gluon/generator's create, userId auto complete bug.
+
+#### 1.8.0
+* added recursive search for models in generator
