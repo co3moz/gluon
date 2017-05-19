@@ -4,7 +4,7 @@ module.exports = function RecursiveSearch(obj, models) {
 
         if (value.constructor == String) {
             if (value.indexOf("@@@") != 0) {
-                continue;
+                return;
             }
 
             value = value.substring(3);
