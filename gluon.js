@@ -75,6 +75,12 @@ function Gluon(options) {
     logger.debug('Request logging mechanism generating..');
     app.use(function (req, res, next) {
       var now = new Date;
+
+      if (logger.level() <= 0) {
+        var keys = Object.keys(req.body);
+        if (keys.length > 0) logger.debug('body information ({length}): {2.EOL}{1 j 4}', keys, req.body, os);
+      }
+
       res.on('finish', function () {
         var status = res.statusCode + '';
         var coloredStatus = res.statusCode >= 500 ? status.red : res.statusCode >= 400 ? status.red
@@ -88,11 +94,6 @@ function Gluon(options) {
           : ('{0:fixed:2}h'.format(time / 3600000)).red;
 
         logger.log(logger.get('request'), {req: req, coloredStatus: coloredStatus, time: time});
-
-        if (logger.level() <= 0) {
-          var keys = Object.keys(req.body);
-          if (keys.length > 0) logger.debug('body information ({length}): {2.EOL}{1 j 4}', keys, req.body, os);
-        }
       });
       next();
     });

@@ -63,3 +63,6 @@
 
 #### 1.8.2
 * fixed recursive search.
+
+#### 1.8.3
+* fixed recursive search.
