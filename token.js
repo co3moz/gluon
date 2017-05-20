@@ -4,7 +4,7 @@ var Sequelize = require('sequelize');
 var db = require('./db');
 var md5 = require('js-md5');
 
-var Token = db.define('Token', {
+var Token = db.define('token', {
   code: {
     type: Sequelize.STRING,
     allowNull: false,

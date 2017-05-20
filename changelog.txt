@@ -66,3 +66,6 @@
 
 #### 1.8.3
 * fixed recursive search.
+
+#### 1.8.4
+* token and role now has camelcase names

@@ -5,7 +5,7 @@ var db = require('./db');
 var md5 = require('js-md5');
 var logger = require('./logger');
 
-var Role = db.define('Role', {
+var Role = db.define('role', {
   code: {
     type: Sequelize.STRING(64),
     allowNull: false,
